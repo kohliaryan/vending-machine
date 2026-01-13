@@ -1,0 +1,64 @@
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException
+
+from schemas import ItemResponseSchema, ItemCreateSchema, PurchaseCreateSchema, PurchaseResponseSchema, \
+    UpdateRequestSchema
+
+inventory = [
+    {"id": 1, "name": "Water Bottle", "quantity": 25, "price": 20.0},
+    {"id": 2, "name": "Chips", "quantity": 15, "price": 30.0},
+    {"id": 3, "name": "Chocolate Bar", "quantity": 1, "price": 40.0},
+    {"id": 4, "name": "Soft Drink", "quantity": 18, "price": 35.0},
+    {"id": 5, "name": "Cookies", "quantity": 12, "price": 25.0}
+]
+
+router = APIRouter()
+
+@router.get("/items", response_model=list[ItemResponseSchema])
+def all_items(max_price: Optional[float] = None):
+    if max_price is None:
+        return inventory
+
+    return [item for item in inventory if item["price"] <= max_price]
+
+@router.post("/item", response_model=ItemResponseSchema, status_code=201)
+def new_item(item_id: int, data: ItemCreateSchema):
+
+    for item in inventory:
+        if item["id"] == item_id:
+            raise HTTPException(status_code=409, detail="Item already exists")
+
+    item = {
+        "id": item_id,
+        "name": data.name,
+        "quantity": data.quantity,
+        "price": data.price
+    }
+    inventory.append(item)
+    return ItemResponseSchema(**item)
+
+@router.post("/items/{item_id}/buy", response_model=PurchaseResponseSchema)
+def purchase_item(item_id: int, data: PurchaseCreateSchema):
+    item = next((item for item in inventory if item["id"] == item_id), None)
+    if not item:
+        raise HTTPException(status_code=400, detail="Invalid Item Id")
+    if item["quantity"] < 1:
+        raise HTTPException(status_code=409, detail=f"Stock Out for {item['name']}")
+    if data.amount_paid < item["price"]:
+        raise HTTPException(status_code=400, detail="Item is more expensive then input amount")
+
+    item["quantity"] -= 1
+
+    return {"status": "success",
+            "item": item["name"],
+            "change": data.amount_paid - item["price"]}
+
+@router.put("/item/{item_id}", response_model=ItemResponseSchema)
+def update_item(item_id: int, data: UpdateRequestSchema):
+    item = next((item for item in inventory if item["id"] == item_id), None)
+    if not item:
+        raise HTTPException(status_code=400, detail="Invalid Item Id!")
+    item["quantity"] = data.quantity
+    return item
+
