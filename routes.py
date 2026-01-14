@@ -3,19 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 
+from database import get_db
 from schemas import ItemResponseSchema, ItemCreateSchema, PurchaseCreateSchema, PurchaseResponseSchema, \
     UpdateRequestSchema
-
-inventory = [
-    {"id": 1, "name": "Water Bottle", "quantity": 25, "price": 20.0},
-    {"id": 2, "name": "Chips", "quantity": 15, "price": 30.0},
-    {"id": 3, "name": "Chocolate Bar", "quantity": 1, "price": 40.0},
-    {"id": 4, "name": "Soft Drink", "quantity": 18, "price": 35.0},
-    {"id": 5, "name": "Cookies", "quantity": 12, "price": 25.0}
-]
-
-def get_db():
-    return inventory
 
 router = APIRouter()
 
