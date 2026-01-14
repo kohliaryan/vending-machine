@@ -7,8 +7,14 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
+import os
+from dotenv import load_dotenv
+
 # 1️⃣ Database URL (SQLite + async driver)
-DATABASE_URL = "sqlite+aiosqlite:///./vending_machine.db"
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # 2️⃣ Create async engine
 engine = create_async_engine(
