@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from pydantic import BaseModel, Field
 
 
@@ -13,7 +15,7 @@ class ItemResponseSchema(BaseModel):
 class ItemCreateSchema(BaseModel):
     name: str
     quantity: int = Field(..., gt=0, le=100)
-    price: float = Field(..., gt=0)
+    price: Decimal = Field(..., gt=0)
 
 class PurchaseResponseSchema(BaseModel):
     status: str
