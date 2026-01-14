@@ -44,7 +44,7 @@ powershell -c "irm [https://astral.sh/uv/install.ps1](https://astral.sh/uv/insta
 ```
 ### 2. Clone the Repository
 ```bash
-git clone [https://github.com/yourusername/fastapi-vending-machine.git](https://github.com/yourusername/fastapi-vending-machine.git)
+git clone https://github.com/kohliaryan/vending-machine.git
 cd fastapi-vending-machine
 ```
 ### 3. Install Dependencies
