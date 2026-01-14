@@ -43,26 +43,35 @@ async def add_item(item_id: int, data: ItemCreateSchema, db: AsyncSession = Depe
 
 
 @router.post("/items/{item_id}/buy", response_model=PurchaseResponseSchema)
-def purchase_item(item_id: int, data: PurchaseCreateSchema, db: list = Depends(get_db)):
-    item = next((item for item in db if item["id"] == item_id), None)
-    if not item:
+async def purchase_item(item_id: int, data: PurchaseCreateSchema, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Item).where(Item.id == item_id)
+    )
+    item = result.scalars().one_or_none()
+    print(item)
+    if item is None:
         raise HTTPException(status_code=400, detail="Invalid Item Id")
-    if item["quantity"] < 1:
-        raise HTTPException(status_code=409, detail=f"Stock Out for {item['name']}")
-    if data.amount_paid < item["price"]:
+    if item.quantity < 1:
+        raise HTTPException(status_code=409, detail=f"Stock Out for {item.name}")
+    if data.amount_paid < item.price:
         raise HTTPException(status_code=400, detail="Item is more expensive then input amount")
 
-    item["quantity"] -= 1
+    item.quantity -= 1
 
+    await db.commit()
+    await db.refresh(item)
     return {"status": "success",
-            "item": item["name"],
-            "change": data.amount_paid - item["price"]}
+            "item": item.name,
+            "change": data.amount_paid - item.price}
 
 
 @router.put("/item/{item_id}", response_model=ItemResponseSchema)
-def update_item(item_id: int, data: UpdateRequestSchema, db: list = Depends(get_db)):
-    item = next((item for item in db if item["id"] == item_id), None)
+async def update_item(item_id: int, data: UpdateRequestSchema, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+    item = result.scalars().one_or_none()
     if not item:
         raise HTTPException(status_code=400, detail="Invalid Item Id!")
-    item["quantity"] = data.quantity
+    item.quantity = data.quantity
+    await db.commit()
+    await db.refresh(item)
     return item

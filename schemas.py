@@ -23,7 +23,7 @@ class PurchaseResponseSchema(BaseModel):
     change: float
 
 class PurchaseCreateSchema(BaseModel):
-    amount_paid: float = Field(..., gt=0)
+    amount_paid: Decimal = Field(..., gt=0)
 
 class UpdateRequestSchema(BaseModel):
     quantity: int = Field(..., gt=0)
