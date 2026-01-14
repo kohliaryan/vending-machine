@@ -13,7 +13,7 @@ class ItemResponseSchema(BaseModel):
 class ItemCreateSchema(BaseModel):
     name: str
     quantity: int = Field(..., gt=0, le=100)
-    price: float = Field(..., ge=0)
+    price: float = Field(..., gt=0)
 
 class PurchaseResponseSchema(BaseModel):
     status: str
