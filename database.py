@@ -13,7 +13,6 @@ DATABASE_URL = "sqlite+aiosqlite:///./vending_machine.db"
 # 2️⃣ Create async engine
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,  # logs SQL queries (turn off in production)
 )
 
 # 3️⃣ Base class for models
