@@ -29,9 +29,3 @@ class Item(Base):
         Numeric(10, 2),
         nullable=False,
     )
-
-    created_at: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
-    )
