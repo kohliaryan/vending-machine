@@ -25,17 +25,10 @@ async def all_items(max_price: Optional[Decimal] = None, db: AsyncSession = Depe
     items = result.scalars().all()
     return items
 
-@router.post("/item/{item_id}", response_model=ItemResponseSchema, status_code=201)
-async def add_item(item_id: int, data: ItemCreateSchema, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(Item).where(Item.id == item_id)
-    )
-    item = result.scalars().one_or_none()
+@router.post("/item", response_model=ItemResponseSchema, status_code=201)
+async def add_item(data: ItemCreateSchema, db: AsyncSession = Depends(get_db)):
 
-    if item:
-        raise HTTPException(status_code=409, detail=f"Item with {item_id} already exist with name {item.name}")
-
-    new_item = Item(id=item_id, name=data.name, quantity=data.quantity, price=data.price)
+    new_item = Item(name=data.name, quantity=data.quantity, price=data.price)
     db.add(new_item)
     await db.commit()
     await db.refresh(new_item)
@@ -75,3 +68,16 @@ async def update_item(item_id: int, data: UpdateRequestSchema, db: AsyncSession 
     await db.commit()
     await db.refresh(item)
     return item
+
+
+@router.delete("/item/{item_id}")
+async def delete_item(item_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+    item = result.scalars().one_or_none()
+    if item is None:
+        raise HTTPException(status_code=404, detail="Invalid item id!")
+
+    await db.delete(item)
+    await db.commit()
+
+    return {"msg": "Deleted Successfully"}
