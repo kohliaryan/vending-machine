@@ -28,6 +28,12 @@ async def all_items(max_price: Optional[Decimal] = None, db: AsyncSession = Depe
 @router.post("/item", response_model=ItemResponseSchema, status_code=201)
 async def add_item(data: ItemCreateSchema, db: AsyncSession = Depends(get_db)):
 
+    result = await db.execute(select(Item).where(Item.name == data.name))
+    item = result.scalars().one_or_none()
+
+    if item is not None:
+        raise HTTPException(status_code=400, detail="Item with same name already exist!")
+
     new_item = Item(name=data.name, quantity=data.quantity, price=data.price)
     db.add(new_item)
     await db.commit()
@@ -41,7 +47,6 @@ async def purchase_item(item_id: int, data: PurchaseCreateSchema, db: AsyncSessi
         select(Item).where(Item.id == item_id)
     )
     item = result.scalars().one_or_none()
-    print(item)
     if item is None:
         raise HTTPException(status_code=400, detail="Invalid Item Id")
     if item.quantity < 1:
