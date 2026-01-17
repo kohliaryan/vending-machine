@@ -9,9 +9,6 @@ class ItemResponseSchema(BaseModel):
     quantity: int
     price: float
 
-    class Config:
-        from_attributes: True
-
 class ItemCreateSchema(BaseModel):
     name: str
     quantity: int = Field(..., gt=0, le=100)
